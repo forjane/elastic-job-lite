@@ -6,28 +6,34 @@ $(function() {
     $("#batch-open").click(function(){
         var jobName = $("#content>div>section>div>div>div>input").val();
         if(jobName){
-            $.ajax({
-                url: "/api/jobs/enableBatchJobs/"+jobName,
-                type: "GET",
-                success: function() {
-                    showSuccessDialog();
-                    $("#jobs-status-overview-tbl").bootstrapTable("refresh");
-                }
-            });
+            var isSure = confirm("确认批量生效作业？")
+            if(isSure){
+                $.ajax({
+                    url: "/api/jobs/enableBatchJobs/"+jobName,
+                    type: "GET",
+                    success: function() {
+                        showSuccessDialog();
+                        $("#jobs-status-overview-tbl").bootstrapTable("refresh");
+                    }
+                });
+            }
         }
     });
 
     $("#batch-disable").click(function(){
         var jobName = $("#content>div>section>div>div>div>input").val();
         if(jobName){
-            $.ajax({
-                url: "/api/jobs/disableBatchJobs/"+jobName,
-                type: "GET",
-                success: function() {
-                    showSuccessDialog();
-                    $("#jobs-status-overview-tbl").bootstrapTable("refresh");
-                }
-            });
+            var isSure = confirm("确认批量失效作业？")
+            if(isSure){
+                $.ajax({
+                    url: "/api/jobs/disableBatchJobs/"+jobName,
+                    type: "GET",
+                    success: function() {
+                        showSuccessDialog();
+                        $("#jobs-status-overview-tbl").bootstrapTable("refresh");
+                    }
+                });
+            }
         }
     });
 });

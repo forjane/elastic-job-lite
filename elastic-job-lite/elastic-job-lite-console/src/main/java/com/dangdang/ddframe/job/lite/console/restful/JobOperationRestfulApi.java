@@ -32,6 +32,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * 作业维度操作的RESTful API.
@@ -40,12 +41,12 @@ import java.util.Collection;
  */
 @Path("/jobs")
 public final class JobOperationRestfulApi {
-    
+
     private JobAPIService jobAPIService = new JobAPIServiceImpl();
-    
+
     /**
      * 获取作业总数.
-     * 
+     *
      * @return 作业总数
      */
     @GET
@@ -53,10 +54,10 @@ public final class JobOperationRestfulApi {
     public int getJobsTotalCount() {
         return jobAPIService.getJobStatisticsAPI().getJobsTotalCount();
     }
-    
+
     /**
      * 获取作业详情.
-     * 
+     *
      * @return 作业详情集合
      */
     @GET
@@ -64,10 +65,32 @@ public final class JobOperationRestfulApi {
     public Collection<JobBriefInfo> getAllJobsBriefInfo() {
         return jobAPIService.getJobStatisticsAPI().getAllJobsBriefInfo();
     }
-    
+
+    @GET
+    @Path("/disableBatchJobs/{jobPrefix}")
+    public void disableBatchJobs(@PathParam("jobPrefix") final String jobPrefix) {
+        Collection<JobBriefInfo> jobBriefInfos = jobAPIService.getJobStatisticsAPI().getAllJobsBriefInfo();
+        for (JobBriefInfo jobBriefInfo : jobBriefInfos) {
+            if (jobBriefInfo.getJobName().startsWith(jobPrefix) && (jobBriefInfo.getStatus() == JobBriefInfo.JobStatus.OK || jobBriefInfo.getStatus() == JobBriefInfo.JobStatus.SHARDING_FLAG)) {
+                jobAPIService.getJobOperatorAPI().disable(Optional.of(jobBriefInfo.getJobName()), Optional.<String>absent());
+            }
+        }
+    }
+
+    @GET
+    @Path("/enableBatchJobs/{jobPrefix}")
+    public void enableBatchJobs(@PathParam("jobPrefix") final String jobPrefix) {
+        Collection<JobBriefInfo> jobBriefInfos = jobAPIService.getJobStatisticsAPI().getAllJobsBriefInfo();
+        for (JobBriefInfo jobBriefInfo : jobBriefInfos) {
+            if (jobBriefInfo.getJobName().startsWith(jobPrefix) && (jobBriefInfo.getStatus() == JobBriefInfo.JobStatus.DISABLED || jobBriefInfo.getStatus() == JobBriefInfo.JobStatus.SHARDING_FLAG)) {
+                jobAPIService.getJobOperatorAPI().enable(Optional.of(jobBriefInfo.getJobName()), Optional.<String>absent());
+            }
+        }
+    }
+
     /**
      * 触发作业.
-     * 
+     *
      * @param jobName 作业名称
      */
     @POST
@@ -75,10 +98,10 @@ public final class JobOperationRestfulApi {
     public void triggerJob(@PathParam("jobName") final String jobName) {
         jobAPIService.getJobOperatorAPI().trigger(Optional.of(jobName), Optional.<String>absent());
     }
-    
+
     /**
      * 禁用作业.
-     * 
+     *
      * @param jobName 作业名称
      */
     @POST
@@ -87,7 +110,7 @@ public final class JobOperationRestfulApi {
     public void disableJob(@PathParam("jobName") final String jobName) {
         jobAPIService.getJobOperatorAPI().disable(Optional.of(jobName), Optional.<String>absent());
     }
-    
+
     /**
      * 启用作业.
      *
@@ -99,10 +122,10 @@ public final class JobOperationRestfulApi {
     public void enableJob(@PathParam("jobName") final String jobName) {
         jobAPIService.getJobOperatorAPI().enable(Optional.of(jobName), Optional.<String>absent());
     }
-    
+
     /**
      * 终止作业.
-     * 
+     *
      * @param jobName 作业名称
      */
     @POST
@@ -111,10 +134,10 @@ public final class JobOperationRestfulApi {
     public void shutdownJob(@PathParam("jobName") final String jobName) {
         jobAPIService.getJobOperatorAPI().shutdown(Optional.of(jobName), Optional.<String>absent());
     }
-    
+
     /**
      * 获取分片信息.
-     * 
+     *
      * @param jobName 作业名称
      * @return 分片信息集合
      */
@@ -124,14 +147,14 @@ public final class JobOperationRestfulApi {
     public Collection<ShardingInfo> getShardingInfo(@PathParam("jobName") final String jobName) {
         return jobAPIService.getShardingStatisticsAPI().getShardingInfo(jobName);
     }
-    
+
     @POST
     @Path("/{jobName}/sharding/{item}/disable")
     @Consumes(MediaType.APPLICATION_JSON)
     public void disableSharding(@PathParam("jobName") final String jobName, @PathParam("item") final String item) {
         jobAPIService.getShardingOperateAPI().disable(jobName, item);
     }
-    
+
     @DELETE
     @Path("/{jobName}/sharding/{item}/disable")
     @Consumes(MediaType.APPLICATION_JSON)

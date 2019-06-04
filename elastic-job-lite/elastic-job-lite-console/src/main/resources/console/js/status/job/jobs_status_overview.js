@@ -2,6 +2,34 @@ $(function() {
     authorityControl();
     renderJobsOverview();
     bindButtons();
+
+    $("#batch-open").click(function(){
+        var jobName = $("#content>div>section>div>div>div>input").val();
+        if(jobName){
+            $.ajax({
+                url: "/api/jobs/enableBatchJobs/"+jobName,
+                type: "GET",
+                success: function() {
+                    showSuccessDialog();
+                    $("#jobs-status-overview-tbl").bootstrapTable("refresh");
+                }
+            });
+        }
+    });
+
+    $("#batch-disable").click(function(){
+        var jobName = $("#content>div>section>div>div>div>input").val();
+        if(jobName){
+            $.ajax({
+                url: "/api/jobs/disableBatchJobs/"+jobName,
+                type: "GET",
+                success: function() {
+                    showSuccessDialog();
+                    $("#jobs-status-overview-tbl").bootstrapTable("refresh");
+                }
+            });
+        }
+    });
 });
 
 function renderJobsOverview() {
